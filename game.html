@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Funny Facts Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #question-container {
+      margin: 20px;
+    }
+    #answer-container {
+      margin: 20px;
+    }
+    #player-container {
+      margin: 20px;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    var currentQuestionIndex = 0;
+    var players = [];
+    var playerNominations = {};
+    var serverUrl = 'https://example.com/nominations'; // Replace with your server URL
+
+    var questions = [
+          "Wie viele Zähne hat ein erwachsener Mensch normalerweise?",
+          "Welche durchschnittliche Temperatur hat der menschliche Körper?",
+          "Wie viele Stunden Schlaf benötigt ein durchschnittlicher Erwachsener pro Nacht?",
+          "Welche durchschnittliche Anzahl an Herzschlägen hat ein Erwachsener pro Minute?",
+          "In welchem Monat haben die meisten Menschen Geburtstag?",
+          "Wie viele Augen hat eine Biene?",
+          "Welcher Prozentsatz der Weltbevölkerung spricht Mandarin?",
+          "Wie viele Knochen hat der menschliche Schädel?",
+          "In welchem Jahr wurde der erste personalisierte Computer (PC) hergestellt?",
+          "Wie viele Monde hat die Erde?",
+          "Welcher Prozentsatz der Erdoberfläche ist mit Wasser bedeckt?",
+          "Wie viele Augen hat eine Spinne?",
+          "Welche durchschnittliche Höhe hat eine Toilette?",
+          "In welchem Jahr wurde das World Wide Web (WWW) erfunden?",
+          "Wie viele Kontinente gibt es auf der Welt?",
+          "Welcher Prozentsatz der Menschen träumt in Schwarz-Weiß?",
+          "Wie viele Kammern hat ein menschliches Herz?",
+          "In welchem Jahr wurde das erste Auto gebaut?",
+          "Wie viele Buchstaben hat das deutsche Alphabet?",
+          "Welche durchschnittliche Anzahl von Geschmacksknospen hat die Zunge?",
+          "Wie viele Muscheln hat eine typische Muschelsuppe?",
+          "In welchem Jahr fand die erste bemannte Mondlandung statt?",
+          "Wie viele Beine hat ein Käfer?",
+          "Welcher Prozentsatz der Luft besteht aus Sauerstoff?",
+          "Wie viele Zehen hat ein durchschnittlicher Mensch?",
+          "In welchem Jahr wurde der erste kommerzielle Flug durchgeführt?",
+          "Wie viele Karten gibt es in einem Standard-Skat-Deck?",
+          "Welcher Prozentsatz der Menschen isst Pizza mindestens einmal im Monat?",
+          "Wie viele Chromosomen hat der menschliche Körper normalerweise?",
+          "In welchem Jahr wurde die Glühbirne erfunden?",
+          "Wie viele Finger hat eine Hand?",
+          "Welcher Prozentsatz der Menschen träumt von fliegenden oder fallenden Träumen?",
+          "Wie viele Sekunden dauert es, bis die Sonnenstrahlen die Erde erreichen?",
+          "In welchem Jahr wurde das erste Mobiltelefon erfunden?",
+          "Wie viele Flügel hat ein typischer Schmetterling?",
+          "Welcher Prozentsatz der Erdoberfläche besteht aus Wüsten?",
+          "Wie viele Gitarrensaiten hat eine Standardgitarre?",
+          "In welchem Jahr wurde der erste Computer-Mikroprozessor hergestellt?",
+          "Wie viele Farben hat ein Regenbogen?",
+          "Welcher Prozentsatz der Menschen hat Angst vor Spinnen?",
+          "Wie viele Tasten hat ein Klavier?",
+          "In welchem Jahr wurde das Periodensystem entwickelt?",
+          "Wie viele Hände hat ein Mensch?",
+          "Welcher Prozentsatz der Menschen isst Frühstück täglich?",
+          "Wie viele Augen hat eine Libelle?",
+          "In welchem Jahr wurde das erste Buch gedruckt?",
+          "Wie viele Muskeln hat der menschliche Körper?",
+          "Welcher Prozentsatz der Menschen ist Rechtshänder?",
+          "Wie viele Sterne gibt es in der Flagge der USA?",
+          "In welchem Jahr wurde der erste moderne Computer hergestellt?",
+          "Wie viele Geschmacksrichtungen kann die menschliche Zunge erkennen?",
+          "Welcher Prozentsatz der Menschen hat ihre Weisheitszähne?",
+          "Wie viele Milliliter Wasser sollte man pro Tag trinken?",
+          "Welche durchschnittliche Dauer hat ein Regenbogen, wenn er sichtbar ist?",
+          "Wie viele Kontinente beginnen mit dem Buchstaben 'A'?",
+          "Welche durchschnittliche Temperatur hat der menschliche Kaffee?",
+          "Wie viele Augen hat ein Tintenfisch?",
+          "Welcher Prozentsatz der Erde besteht aus Eis?",
+          "Wie viele Zehen hat ein Hund normalerweise?",
+          "In welchem Jahr wurde die erste E-Mail gesendet?",
+          "Wie viele Knochen hat ein menschlicher Fuß?",
+          "Welche durchschnittliche Anzahl von Büchern liest eine Person pro Jahr?",
+          "Wie viele Buchstaben hat das längste deutsche Wort?",
+          "Welcher Prozentsatz der Menschen trägt regelmäßig Brille?",
+          "Wie viele Erdbeeren isst der durchschnittliche Mensch pro Jahr?",
+          "In welchem Jahr wurde der erste Teddybär hergestellt?",
+          "Wie viele Quadratzentimeter hat eine Standard-Postkarte?",
+          "Welche durchschnittliche Anzahl von Wörtern spricht ein Mensch pro Minute?",
+          "Wie viele Hände hat ein Uhrzeiger auf einer Uhr?",
+          "Welcher Prozentsatz der Menschen hat eine Lieblingsfarbe?",
+          "Wie viele Hände hat ein Durchschnittsmensch?",
+          "In welchem Jahr wurde die erste Tonaufnahme gemacht?",
+          "Wie viele Buchstaben hat das kürzeste deutsche Wort?",
+          "Welcher Prozentsatz der Menschen hat mindestens einmal in ihrem Leben Schach gespielt?",
+          "Wie viele Sekunden dauert es, bis ein Donner nach einem Blitz zu hören ist?",
+          "In welchem Jahr wurde das erste Papiergeld eingeführt?",
+          "Wie viele Monate haben 28 Tage?",
+          "Welcher Prozentsatz der Menschen hat mindestens einmal in ihrem Leben einen Berg bestiegen?",
+          "Wie viele Gramm Zucker enthält eine durchschnittliche Banane?",
+          "In welchem Jahr wurde der erste Farbfilm veröffentlicht?",
+          "Wie viele Zähne hat ein durchschnittliches Kind, wenn es alle seine Milchzähne hat?",
+          "Welcher Prozentsatz der Menschen hat mindestens einmal in ihrem Leben einen Marathon gelaufen?",
+          "Wie viele Stunden dauert ein durchschnittlicher Arbeitstag?",
+          "In welchem Jahr wurde die erste Briefmarke herausgegeben?",
+          "Wie viele Kilometer pro Stunde beträgt die durchschnittliche Geschwindigkeit eines wandernden Menschen?",
+          "Welcher Prozentsatz der Menschen hat mindestens einmal in ihrem Leben einen Baum gepflanzt?",
+          "Wie viele Muscheln gibt es normalerweise in einer typischen Muschelsuppe?",
+          "In welchem Jahr wurde der erste Computer-Virus entdeckt?",
+          "Wie viele Finger hat eine Hand eines Menschen?",
+          "Welcher Prozentsatz der Menschen isst regelmäßig Sushi?",
+          "Wie viele Gramm wiegt eine durchschnittliche Wolke?",
+          "In welchem Jahr wurde der erste Fahrrad-Verkehrszeichen installiert?",
+          "Wie viele Liter Blut hat der durchschnittliche erwachsene Mensch?",
+          "Welcher Prozentsatz der Menschen hat mindestens einmal in ihrem Leben im Ausland gelebt?",
+          "Wie viele Buchstaben hat das längste deutsche Wort ohne Vokale?",
+          "In welchem Jahr wurde das erste Elektroauto gebaut?",
+          "Wie viele Stunden dauert ein durchschnittlicher Flug von New York nach London?",
+          "Welcher Prozentsatz der Menschen hat einen Führerschein?",
+          "Wie viele Zehen hat eine Katze normalerweise?",
+          "In welchem Jahr wurde das erste digitale Foto gemacht?",
+          "Wie viele Meter beträgt die durchschnittliche Höhe eines Basketballkorbs?",
+          "Welcher Prozentsatz der Menschen hat mindestens einmal in ihrem Leben Paragliding gemacht?",
+          "Wie viele Gramm wiegt eine durchschnittliche Portion Pommes Frites?",
+          "Wie oft blinzelt eine durchschnittliche Person pro Minute?",
+          "Mit welcher Geschwindigkeit kann ein Niesen erreichen (in Kilometern pro Stunde)?",
+          "Welcher Prozentsatz der Menschen gibt zu, mehr mit ihren Haustieren zu sprechen als mit ihren Freunden?",
+          "Wie viele Kilogramm Käse isst der durchschnittliche Amerikaner pro Jahr?",
+          "Wie viele Hotdogs kann der Weltmeisteresser in 10 Minuten essen (Stand des letzten Wettbewerbs)?",
+          "Wie viele Jahre dauert die längste Schluckaufserie der Welt (in Sekunden)?",
+          "Wie viele Selfies werden weltweit täglich durchschnittlich gemacht?",
+          "Welcher Prozentsatz der Menschen gibt an, regelmäßig unter der Dusche zu singen?",
+          "Wie viele Tassen Kaffee trinkt eine durchschnittliche Person im Jahr?",
+          "Welcher Prozentsatz der Menschen hat ihr Telefon schon einmal in die Toilette fallen lassen?",
+          "Wie oft vergisst eine durchschnittliche Person pro Tag, warum sie in einen Raum gegangen ist?",
+          "Welcher Prozentsatz der Menschen hat zugegeben, in einer Woche ihren Autoschlüssel zu verlieren?",
+          "Wie viele Menschen haben versucht, einen Handstand zu machen und sind gescheitert?",
+          "In Zentimetern, wie lang ist das längste Ohrenhaar der Welt?",
+          "Welcher Prozentsatz der Menschen hat in einem Monat vergessen, warum sie in einen Raum gegangen sind?",
+          "Wie viele Menschen haben versucht, einen Rückwärtssalto zu machen und sind gescheitert?",
+          "In Kilogramm, wie schwer ist der schwerste Kohlkopf der Welt?",
+          "Welcher Prozentsatz der Menschen hat zugegeben, jemanden in einem Raum anzurufen, nur um nicht mit ihnen sprechen zu müssen?",
+          "Wie oft vergisst eine durchschnittliche Person pro Jahr, wo sie ihr Auto auf einem Parkplatz abgestellt hat?",
+          "Welcher Prozentsatz der Menschen hat versucht, den Mondspaziergang zu machen und ist gestolpert?",
+          "In Kilogramm, wie schwer ist die schwerste Wassermelone der Welt?",
+          "Welcher Prozentsatz der Menschen hat so laut gelacht, dass ihnen Soda aus der Nase kam?",
+          "Wie oft schaut eine durchschnittliche Person pro Woche lustige Tiervideos an?",
+          "Welcher Prozentsatz der Menschen hat versucht, einen Kopfstand zu machen und ist gefallen?",
+          "In Zentimetern, wie lang ist das längste Ohrenhaar der Welt?",
+          "Wie oft vergisst eine durchschnittliche Person pro Woche, warum sie dort hingegangen ist?",
+          "Welcher Prozentsatz der Menschen hat ein Selfie mit einer Statue gemacht?",
+          "In Sekunden, wie lange dauert die längste Schluckaufserie einer Frau?",
+          "Welcher Prozentsatz der Menschen hat versucht, den Macarena-Tanz zu machen?",
+          "Wie oft nennt eine durchschnittliche Person jemanden in einem Monat versehentlich beim falschen Namen?",
+          "Welcher Prozentsatz der Menschen hat versucht, einen Zaubertrick zu machen und ist gescheitert?",
+          "In Stunden, wie lange dauert der längste aufgezeichnete Telefonanruf?",
+          "Welcher Prozentsatz der Menschen hat mit ihrem Auto gesprochen, als ob es sie verstehen könnte?",
+          "Wie oft vergisst eine durchschnittliche Person pro Woche, wo sie ihre Schlüssel hingelegt hat?",
+          "Welcher Prozentsatz der Menschen hat versucht, einen Rückwärtssalto zu machen und ist gefallen?",
+          "In Zentimetern, wie lang ist das längste Fingernagel einer Frau?",
+          "Welcher Prozentsatz der Menschen hat zugegeben, ein Hemd verkehrt herum getragen zu haben?",
+          "Wie oft schaut eine durchschnittliche Person pro Tag in den Kühlschrank, ohne etwas zu essen zu finden?",
+          "Welcher Prozentsatz der Menschen hat versucht, den Mondspaziergang zu machen und ist gestolpert?",
+          "In Kilogramm, wie schwer ist die schwerste Wassermelone der Welt?",
+          "Welcher Prozentsatz der Menschen hat so laut gelacht, dass ihnen Soda aus der Nase kam?",
+          "Wie oft schaut eine durchschnittliche Person pro Woche lustige Tiervideos an?",
+          "Welcher Prozentsatz der Menschen hat versucht, einen Kopfstand zu machen und ist gefallen?",
+          "In Zentimetern, wie lang ist das längste Ohrenhaar der Welt?",
+          "Wie oft vergisst eine durchschnittliche Person pro Jahr, wo sie ihre Schlüssel hingelegt hat?",
+          "Welcher Prozentsatz der Menschen hat versucht, einen Rückwärtssalto zu machen und ist gefallen?",
+          "In Kilogramm, wie schwer ist der schwerste Zucchini der Welt?",
+          "Welcher Prozentsatz der Menschen hat zugegeben, jemanden auf der Straße angelächelt zu haben, der gar nicht sie gemeint war?"
+        ];  
+
+        var answers = [
+          "32 Zähne",
+          "37 Grad Celsius",
+          "7-8 Stunden",
+          "Etwa 70-100 Herzschläge",
+          "September",
+          "5 Augen",
+          "14%",
+          "22 Knochen",
+          "1971",
+          "1 Mond",
+          "71%",
+          "8 Augen",
+          "40-45 Zentimeter",
+          "1989",
+          "7 Kontinente",
+          "12%",
+          "4 Kammern",
+          "1886",
+          "26 Buchstaben",
+          "2000-5000 Geschmacksknospen",
+          "12 Muscheln",
+          "1969",
+          "6 Beine",
+          "21%",
+          "10 Zehen",
+          "1903",
+          "32 Karten",
+          "93%",
+          "46 Chromosomen",
+          "1879",
+          "5 Finger",
+          "75%",
+          "8 Minuten",
+          "1973",
+          "4 Flügel",
+          "33%",
+          "6 Saiten",
+          "1971",
+          "7 Farben",
+          "30%",
+          "88 Tasten",
+          "1869",
+          "2 Hände",
+          "50%",
+          "4 Augen",
+          "1455",
+          "600 Muskeln",
+          "90%",
+          "50 Sterne",
+          "1941",
+          "10,000 Geschmacksrichtungen",
+          "35%",
+          "32 Zähne",
+          "Etwa 2000 Milliliter",
+          "30 Minuten",
+          "4 Kontinente",
+          "65 Grad Celsius",
+          "3 Augen",
+          "10%",
+          "4 Zehen",
+          "1971",
+          "26 Knochen",
+          "12 Bücher",
+          "30 Buchstaben",
+          "64%",
+          "3 Kilogramm",
+          "1902",
+          "15 Quadratzentimeter",
+          "125 Wörter",
+          "2 Hände",
+          "78%",
+          "2 Hände",
+          "1877",
+          "2 Buchstaben",
+          "50%",
+          "5 Sekunden",
+          "1661",
+          "Alle 12 Monate",
+          "8%",
+          "15 Gramm",
+          "1935",
+          "20 Zähne",
+          "3%",
+          "8 Stunden",
+          "1840",
+          "5 km/h",
+          "23%",
+          "12 Muscheln",
+          "1986",
+          "5 Finger",
+          "25%",
+          "500 Gramm",
+          "1926",
+          "4 Stunden",
+          "30 Liter",
+          "8%",
+          "25 Buchstaben",
+          "1886",
+          "7 Stunden",
+          "7 Stunden",
+          "90%",
+          "18 Zehen",
+          "1975",
+          "1825 Meter",
+          "12%",
+          "300 Gramm",
+          "20 Mal",
+          "Ungefähr 160 Kilometer pro Stunde",
+          "25%",
+          "Etwa 15 Kilogramm",
+          "75 Hot Dogs (Joey Chestnut, Stand 2022)",
+          "68 Jahre",
+          "Über 1 Milliarde Selfies täglich",
+          "50%",
+          "1,5 Tassen täglich",
+          "7%",
+          "Etwa 5 Mal",
+          "18%",
+          "Nie",
+          "13,2 Zentimeter",
+          "10%",
+          "3 Kilogramm",
+          "30%",
+          "250 Kilogramm",
+          "15%",
+          "10 Mal",
+          "18%",
+          "6 Mal",
+          "15 Kilogramm",
+          "12%",
+          "2 Mal",
+          "10%",
+          "10 Mal",
+          "18%",
+          "25 Mal",
+          "15%",
+          "3 Mal",
+          "3 Minuten",
+          "15 Mal pro Woche",
+          "Täglich",
+          "30%",
+          "3 Mal pro Tag",
+          "8 Stunden pro Jahr",
+          "10%",
+          "5 Mal pro Tag",
+          "15%",
+          "2 Stunden pro Tag",
+          "10%",
+          "1 Minute",
+          "7%",
+          "3 Mal pro Woche",
+          "5 Stunden pro Monat",
+          "10 Mal pro Woche",
+          "2 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "5 Mal pro Woche",
+          "3 Mal pro Woche",
+          "2 Mal pro Tag",
+          "10 Minuten",
+          "2 Mal pro Woche",
+          "1 Stunde pro Woche",
+          "5 Mal pro Woche",
+          "2 Minuten",
+          "3 Mal pro Tag",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten",
+          "4 Mal pro Woche",
+          "2 Mal pro Woche",
+          "2 Stunden pro Woche",
+          "3 Mal pro Woche",
+          "3 Minuten",
+          "2 Mal pro Tag",
+          "5 Minuten"
+        ];
+
+    function showQuestion() {
+      document.getElementById('question-container').innerHTML = questions[currentQuestionIndex];
+      document.getElementById('answer-container').innerHTML = '';
+    }
+
+    function showAnswer() {
+      document.getElementById('answer-container').innerHTML = answers[currentQuestionIndex];
+    }
+
+    function nextQuestion() {
+      clearPlayerNomination(); // Clear nomination for the current player
+      
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        showQuestion();
+        updatePlayerList();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showQuestion();
+        updatePlayerList();
+      }
+    }
+
+    function addPlayer() {
+      var playerName = prompt('Enter your name:');
+      if (playerName) {
+        players.push(playerName);
+        playerNominations[playerName] = '';
+        updatePlayerList();
+        fetchNominations(); // Retrieve nominations when a new player joins
+      }
+    }
+
+    function nominatePlayer() {
+      var currentPlayer = players[currentQuestionIndex];
+      var nominatedPlayer = prompt('Nominate another player for ' + currentPlayer + ':');
+      if (nominatedPlayer && players.includes(nominatedPlayer)) {
+        playerNominations[currentPlayer] = nominatedPlayer;
+        updatePlayerList();
+        sendNominations(); // Send updated nominations to the server
+      }
+    }
+
+    function clearPlayerNomination() {
+      var currentPlayer = players[currentQuestionIndex];
+      playerNominations[currentPlayer] = '';
+      updatePlayerList();
+      sendNominations(); // Send updated nominations to the server
+    }
+
+    function updatePlayerList() {
+      var playerListHtml = '<strong>Players:</strong> ';
+      for (var i = 0; i < players.length; i++) {
+        playerListHtml += players[i] + ' (Nominated: ' + playerNominations[players[i]] + '), ';
+      }
+      document.getElementById('player-container').innerHTML = playerListHtml.slice(0, -2); // Remove the trailing comma and space
+    }
+
+    function sendNominations() {
+      // Send nominations to the server
+      fetch(serverUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(playerNominations),
+      });
+    }
+
+    function fetchNominations() {
+      // Fetch nominations from the server
+      fetch(serverUrl)
+        .then(response => response.json())
+        .then(data => {
+          playerNominations = data;
+          updatePlayerList();
+        })
+        .catch(error => console.error('Error fetching nominations:', error));
+    }
+  </script>
+</head>
+<body>
+  <h1>Funny Facts Game</h1>
+
+  <div id="question-container"></div>
+  <div id="answer-container"></div>
+  <div id="player-container"></div>
+
+  <button onclick="prevQuestion()">Previous Question</button>
+  <button onclick="showAnswer()">Show Answer</button>
+  <button onclick="nextQuestion()">Next Question</button>
+  <button onclick="addPlayer()">Add Player</button>
+  <button onclick="nominatePlayer()">Nominate Player</button>
+
+  <script>
+    // Initial question display
+    showQuestion();
+    // Retrieve nominations when the page loads
+    fetchNominations();
+  </script>
+</body>
+</html>
