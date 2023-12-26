@@ -1,22 +1,38 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const http = require('http');
+const socketIO = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
+
 const PORT = 3000;
 
 app.use(bodyParser.json());
 
-let playerNominations = {};
+let players = [];
 
-app.get('/nominations', (req, res) => {
-  res.json(playerNominations);
+io.on('connection', (socket) => {
+  // Send the current player list to the new client
+  socket.emit('updatePlayerList', players);
+
+  socket.on('addPlayer', (playerName) => {
+    players.push(playerName);
+    // Broadcast the updated player list to all clients
+    io.emit('updatePlayerList', players);
+  });
+
+  socket.on('disconnect', () => {
+    // Handle player disconnect
+    io.emit('updatePlayerList', players);
+  });
 });
 
-app.post('/nominations', (req, res) => {
-  playerNominations = req.body;
-  res.json({ success: true });
+app.get('/players', (req, res) => {
+  res.json(players);
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -1,37 +1,22 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Funny Facts Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    #question-container {
-      margin: 20px;
-    }
-    #answer-container {
-      margin: 20px;
-    }
-    #player-container {
-      margin: 20px;
-    }
-    button {
-      padding: 10px;
-      font-size: 16px;
-      margin: 5px;
-      cursor: pointer;
-    }
-  </style>
-  <script>
-    var currentQuestionIndex = 0;
-    var players = [];
-    var playerNominations = {};
-    var serverUrl = 'game-kkecu32wl-daniels-projects-efa03798.vercel.app'; // Replace with your server URL
+<!-- Include the socket.io client library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
 
-    var questions = [
+<script>
+  var currentQuestionIndex = 0;
+  var players = [];
+  var playerNominations = {};
+  var serverUrl = 'game-kkecu32wl-daniels-projects-efa03798.vercel.app'; // Replace with your server URL
+
+  // Establish a WebSocket connection
+  var socket = io.connect(serverUrl);
+
+  // Listen for updates to the player list
+  socket.on('updatePlayerList', function(updatedPlayers) {
+    players = updatedPlayers;
+    updatePlayerList();
+  });
+
+var questions = [
           "Wie viele Zähne hat ein erwachsener Mensch normalerweise?",
           "Welche durchschnittliche Temperatur hat der menschliche Körper?",
           "Wie viele Stunden Schlaf benötigt ein durchschnittlicher Erwachsener pro Nacht?",
@@ -447,109 +432,59 @@
           "5 Minuten"
         ];
 
-    function showQuestion() {
-      document.getElementById('question-container').innerHTML = questions[currentQuestionIndex];
-      document.getElementById('answer-container').innerHTML = '';
-    }
+  function showQuestion() {
+    document.getElementById('question-container').innerHTML = questions[currentQuestionIndex];
+    document.getElementById('answer-container').innerHTML = '';
+  }
 
-    function showAnswer() {
-      document.getElementById('answer-container').innerHTML = answers[currentQuestionIndex];
-    }
+  function showAnswer() {
+    document.getElementById('answer-container').innerHTML = answers[currentQuestionIndex];
+  }
 
-    function nextQuestion() {
-      clearPlayerNomination(); // Clear nomination for the current player
-      
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        showQuestion();
-        updatePlayerList();
-      }
+  function nextQuestion() {
+    clearPlayerNomination(); // Clear nomination for the current player
+    
+    if (currentQuestionIndex < questions.length - 1) {
+      currentQuestionIndex++;
+      showQuestion();
     }
+  }
 
-    function prevQuestion() {
-      if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        showQuestion();
-        updatePlayerList();
-      }
+  function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      showQuestion();
     }
+  }
 
-    function addPlayer() {
-      var playerName = prompt('Enter your name:');
-      if (playerName) {
-        players.push(playerName);
-        playerNominations[playerName] = '';
-        updatePlayerList();
-        fetchNominations(); // Retrieve nominations when a new player joins
-      }
+  function addPlayer() {
+    var playerName = prompt('Enter your name:');
+    if (playerName) {
+      // Send a message to the server to add the new player
+      socket.emit('addPlayer', playerName);
     }
+  }
 
-    function nominatePlayer() {
-      var currentPlayer = players[currentQuestionIndex];
-      var nominatedPlayer = prompt('Nominate another player for ' + currentPlayer + ':');
-      if (nominatedPlayer && players.includes(nominatedPlayer)) {
-        playerNominations[currentPlayer] = nominatedPlayer;
-        updatePlayerList();
-        sendNominations(); // Send updated nominations to the server
-      }
-    }
-
-    function clearPlayerNomination() {
-      var currentPlayer = players[currentQuestionIndex];
-      playerNominations[currentPlayer] = '';
+  function nominatePlayer() {
+    var currentPlayer = players[currentQuestionIndex];
+    var nominatedPlayer = prompt('Nominate another player for ' + currentPlayer + ':');
+    if (nominatedPlayer && players.includes(nominatedPlayer)) {
+      playerNominations[currentPlayer] = nominatedPlayer;
       updatePlayerList();
-      sendNominations(); // Send updated nominations to the server
     }
+  }
 
-    function updatePlayerList() {
-      var playerListHtml = '<strong>Players:</strong> ';
-      for (var i = 0; i < players.length; i++) {
-        playerListHtml += players[i] + ' (Nominated: ' + playerNominations[players[i]] + '), ';
-      }
-      document.getElementById('player-container').innerHTML = playerListHtml.slice(0, -2); // Remove the trailing comma and space
+  function clearPlayerNomination() {
+    var currentPlayer = players[currentQuestionIndex];
+    playerNominations[currentPlayer] = '';
+    updatePlayerList();
+  }
+
+  function updatePlayerList() {
+    var playerListHtml = '<strong>Players:</strong> ';
+    for (var i = 0; i < players.length; i++) {
+      playerListHtml += players[i] + ' (Nominated: ' + playerNominations[players[i]] + '), ';
     }
-
-    function sendNominations() {
-      // Send nominations to the server
-      fetch(serverUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(playerNominations),
-      });
-    }
-
-    function fetchNominations() {
-      // Fetch nominations from the server
-      fetch(serverUrl)
-        .then(response => response.json())
-        .then(data => {
-          playerNominations = data;
-          updatePlayerList();
-        })
-        .catch(error => console.error('Error fetching nominations:', error));
-    }
-  </script>
-</head>
-<body>
-  <h1>Funny Facts Game</h1>
-
-  <div id="question-container"></div>
-  <div id="answer-container"></div>
-  <div id="player-container"></div>
-
-  <button onclick="prevQuestion()">Previous Question</button>
-  <button onclick="showAnswer()">Show Answer</button>
-  <button onclick="nextQuestion()">Next Question</button>
-  <button onclick="addPlayer()">Add Player</button>
-  <button onclick="nominatePlayer()">Nominate Player</button>
-
-  <script>
-    // Initial question display
-    showQuestion();
-    // Retrieve nominations when the page loads
-    fetchNominations();
-  </script>
-</body>
-</html>
+    document.getElementById('player-container').innerHTML = playerListHtml.slice(0, -2); // Remove the trailing comma and space
+  }
+</script>
